@@ -12,11 +12,19 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 当前自动化任务的运行环境
     steps:
-      - uses: actions/checkout@v3
-      - id: aws-auth
+      - uses: actions/checkout@v3 # 拉取镜像
+      - id: aws-auth # 获取AWS认证
         uses: "./.github/actions/aws-auth"
+      - name: Build and push dev image to ECR
+        env:
+          REGISTRY: ${{ steps.aws-auth.outputs.registry }}
+          REPOSITORY: devopsgirl2023/hello-ops-girl
+          IMAGE_TAG: ${{ github.sha }}-czy
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
   test:
     runs-on: ubuntu-latest
